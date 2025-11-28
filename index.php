@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Attendance</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root {
+    --primary-color: #360c45;
+    --secondary-color: #654689;
+    --light-bg: #f5f7fa;
+    --text-color: #1f2937;
+    --border-color: #d1d5db;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+h2 { text-align: center; color: var(--primary-color); margin-top: 20px; }
+
+nav {
+    background-color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    margin: 0;
+}
+
+nav a {
+    color: var(--white);
+    text-decoration: none;
+    padding: 10px 20px;
+    width: 100%;
+    text-align: center;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+nav a:hover { background-color: var(--secondary-color); }
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    max-width: 95%;
+}
+
+.search-box {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+#search-box {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 240px;
+}
+
+.control-btn {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+.control-btn:hover { background-color: #48326a; }
+
+.sort-status {
+    font-size: 0.95rem;
+    color: #374151;
+    margin-left: 10px;
+}
+
+/* Table styling */
+table {
+    border-collapse: collapse;
+    margin: 10px auto;
+    background-color: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 14px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+th, td {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    font-weight: 600;
+}
+
+tr:last-child td { border-bottom: none; }
+
+form {
+    background-color: var(--white);
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 600px;
+}
+
+fieldset { border: 2px solid var(--secondary-color); border-radius: 10px; padding: 20px; }
+legend { color: var(--primary-color); font-weight: bold; font-size: 1.1em; padding: 0 10px; }
+label { display: block; margin-bottom: 5px; font-weight: 500; }
+.inputform {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border 0.3s;
+}
+.inputform:focus { border-color: var(--secondary-color); outline: none; }
+
+.error-message { color: red; font-size: 0.9em; margin-top: 4px; min-height:18px; }
+
+button {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+button:hover { background-color: #2563eb; }
+
+.confirm-message {
+    color: green;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.green-row { background-color: #d1fae5 !important; }
+.yellow-row { background-color: #fef3c7 !important; }
+.red-row { background-color: #fee2e2 !important; }
+
+#report-section {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: none;
+    text-align: center;
+}
+
+.row-hover { outline: 3px solid rgba(99,102,241,0.12); transition: outline 0.18s; }
+
+@media (min-width: 600px) {
+    nav { flex-direction: row; justify-content: center; }
+    nav a { width: auto; }
+    table { font-size: 15px; max-width: 90%; }
+    button { width: auto; padding: 10px 20px; }
+}
+@media (min-width: 992px) {
+    nav { justify-content: flex-start; gap: 15px; padding-left: 40px; }
+    table { font-size: 16px; max-width: 85%; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="#attendance">Attendance List</a>
+    <a href="#addStudent">Add Student</a>
+    <a href="#report-section">Reports</a>
+</nav>
+
+<div class="container">
+    <h2 id="attendance">Attendance List</h2>
+
+    <!-- Controls: search + sorting (Option A - above table) -->
+    <div class="controls" role="region" aria-label="Search and sort controls">
+        <div class="search-box">
+            <label for="search-box" style="font-weight:600; margin-right:6px;">Search by Name:</label>
+            <input id="search-box" type="text" placeholder="Last or First name">
+        </div>
+
+        <button id="sort-abs" class="control-btn" type="button">Sort Absences ↑</button>
+        <button id="sort-part" class="control-btn" type="button">Sort Participation ↓</button>
+
+        <div id="sort-status" class="sort-status" aria-live="polite"></div>
+    </div>
+
+    <table id="attendanceTable" aria-describedby="sort-status">
+        <thead>
+            <tr>
+                <th rowspan="2">ID</th>
+                <th rowspan="2">Last Name</th>
+                <th rowspan="2">First Name</th>
+                <th rowspan="2">Course</th>
+                <th colspan="2">S1</th><th colspan="2">S2</th><th colspan="2">S3</th>
+                <th colspan="2">S4</th><th colspan="2">S5</th><th colspan="2">S6</th>
+                <th rowspan="2">Absence</th><th rowspan="2">Participation</th><th rowspan="2">Message</th>
+            </tr>
+            <tr>
+                <th>P</th><th>Pa</th><th>P</th><th>Pa</th><th>P</th><th>Pa</th><th>P</th><th>Pa</th>
+                <th>P</th><th>Pa</th><th>P</th><th>Pa</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>0002</td>
+                <td class="ln">Si Bachir</td>
+                <td class="fn">Lyna</td>
+                <td>PAW</td>
+
+                <!-- S1..S6 (P, Pa pairs) -->
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+
+                <td class="absence-count">5</td>
+                <td class="participation-count">1</td>
+                <td class="message-cell"></td>
+            </tr>
+
+            <tr>
+                <td>0003</td>
+                <td class="ln">Seba</td>
+                <td class="fn">Bouchra</td>
+                <td>PAW</td>
+
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+
+                <td class="absence-count">1</td>
+                <td class="participation-count">4</td>
+                <td class="message-cell"></td>
+            </tr>
+
+            <tr>
+                <td>0004</td>
+                <td class="ln">Souchane</td>
+                <td class="fn">Cerine</td>
+                <td>PAW</td>
+
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+                <td><input type="checkbox"></td><td><input type="checkbox"></td>
+
+                <td class="absence-count">4</td>
+                <td class="participation-count">2</td>
+                <td class="message-cell"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="text-align:center; margin-top:12px;">
+        <button id="showReportBtn" class="control-btn" style="display:inline-block;">Show Report</button>
+        <button id="highlightBtn" class="control-btn" style="display:inline-block; margin-left:8px;">Highlight Excellent Students</button>
+        <button id="resetBtn" class="control-btn" style="display:inline-block; margin-left:8px;">Reset Colors</button>
+    </div>
+
+    <div id="report-section" class="report-container">
+        <div id="report-section">
+        <canvas id="reportChart" width="400" height="200" aria-label="Attendance chart"></canvas>
+    </div>
+
+    <form id="addStudent" action="#" method="post">
+        <fieldset>
+            <legend><h2>Add New Student</h2></legend>
+            <div>
+                <label for="studentID">Student ID:</label>
+                <input type="text" name="studentID" id="studentID" class="inputform" placeholder="Enter student ID">
+                <div class="error-message" id="studentID-error"></div>
+            </div><br>
+            <div>
+                <label for="lastname">Last Name:</label>
+                <input type="text" name="lastname" id="lastname" class="inputform" placeholder="Enter last name">
+                <div class="error-message" id="lastname-error"></div>
+            </div><br>
+            <div>
+                <label for="firstname">First Name:</label>
+                <input type="text" name="firstname" id="firstname" class="inputform" placeholder="Enter first name">
+                <div class="error-message" id="firstname-error"></div>
+            </div><br>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" class="inputform" placeholder="Enter email">
+                <div class="error-message" id="email-error"></div>
+            </div><br>
+            <button type="submit">Add Student</button>
+            <div class="confirm-message" id="confirm-message" role="status" aria-live="polite"></div>
+        </fieldset>
+    </form>
+</div>
+
+<!-- external libs -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+$(function(){
+    /* =========================
+       Utility & Core Functions
+       ========================= */
+
+    function updateAttendance() {
+        $('#attendanceTable tbody tr').each(function(){
+            let absences = 0, participations = 0;
+            // checkbox cells are columns 4..15 (0-based td indices)
+            // but it's safer to target inputs inside row and count pairs
+            const inputs = $(this).find('td').find('input[type="checkbox"]');
+            inputs.each(function(i){
+                // even index = presence (P) - checked -> present, unchecked -> absence
+                if(i % 2 === 0){
+                    if(!$(this).prop('checked')) absences++;
+                } else {
+                    // odd index = participation (Pa) - checked -> participated
+                    if($(this).prop('checked')) participations++;
+                }
+            });
+
+            // Update counts in cells
+            $(this).find('.absence-count').text(absences);
+            $(this).find('.participation-count').text(participations);
+
+            // remove previous color classes
+            $(this).removeClass('green-row yellow-row red-row');
+
+            // apply row color based on absences
+            if(absences >= 5) $(this).addClass('red-row');
+            else if(absences >= 3) $(this).addClass('yellow-row');
+            else $(this).addClass('green-row');
+
+            // set message
+            let msg = "";
+
+if (absences >= 5) {
+    msg = "Excluded – too many absences – You need to participate more";
+} 
+else if (absences >= 3) {
+    msg = "Warning – attendance low – You need to participate more";
+} 
+else {
+    if (participations >= 4) {
+        msg = "Good attendance – Excellent participation";
+    } 
+    else if (participations >= 2) {
+        msg = "Good attendance – Keep participating!";
+    } 
+    else {
+        msg = "Attendance acceptable – Needs more participation";
+    }
+}
+            $(this).find('.message-cell').text(msg);
+        });
+    }
+
+    // Attach change listener via delegation so dynamically added checkboxes trigger update
+    $('#attendanceTable tbody').on('change', 'input[type="checkbox"]', updateAttendance);
+
+    // initial run
+    updateAttendance();
+
+    /* =========================
+       Add Student (Validation + Append)
+       ========================= */
+    function clearAddFormErrors(){
+        $('.error-message').text('');
+        $('#confirm-message').text('');
+    }
+
+    $('#addStudentForm').on('submit', function(e){
+        e.preventDefault();
+        clearAddFormErrors();
+
+        let valid = true;
+        const studentID = $('#studentID').val().trim();
+        const lastname = $('#lastname').val().trim();
+        const firstname = $('#firstname').val().trim();
+        const email = $('#email').val().trim();
+
+        if(!studentID){
+            $('#studentID-error').text("Student ID is required.");
+            valid = false;
+        } else if(!/^\d+$/.test(studentID)){
+            $('#studentID-error').text("Student ID must contain only numbers.");
+            valid = false;
+        }
+
+        if(!lastname){
+            $('#lastname-error').text("Last Name is required.");
+            valid = false;
+        } else if(!/^[A-Za-z\u00C0-\u017F\s'-]+$/.test(lastname)){
+            // allow accented letters, spaces, hyphens, apostrophes
+            $('#lastname-error').text("Last Name must contain only letters.");
+            valid = false;
+        }
+
+        if(!firstname){
+            $('#firstname-error').text("First Name is required.");
+            valid = false;
+        } else if(!/^[A-Za-z\u00C0-\u017F\s'-]+$/.test(firstname)){
+            $('#firstname-error').text("First Name must contain only letters.");
+            valid = false;
+        }
+
+        if(!email){
+            $('#email-error').text("Email is required.");
+            valid = false;
+        } else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+            $('#email-error').text("Invalid email format.");
+            valid = false;
+        }
+
+        if(!valid) return;
+
+        // Build row - give last/first name cells classes ln and fn
+        const row = $('<tr>' +
+            `<td>${$('<div>').text(studentID).html()}</td>` +
+            `<td class="ln">${$('<div>').text(lastname).html()}</td>` +
+            `<td class="fn">${$('<div>').text(firstname).html()}</td>` +
+            `<td>Course</td>` +
+            // 12 checkboxes (6 sessions * 2)
+            `<td><input type="checkbox"></td><td><input type="checkbox"></td>` +
+            `<td><input type="checkbox"></td><td><input type="checkbox"></td>` +
+            `<td><input type="checkbox"></td><td><input type="checkbox"></td>` +
+            `<td><input type="checkbox"></td><td><input type="checkbox"></td>` +
+            `<td><input type="checkbox"></td><td><input type="checkbox"></td>` +
+            `<td><input type="checkbox"></td><td><input type="checkbox"></td>` +
+            `<td class="absence-count">0</td>` +
+            `<td class="participation-count">0</td>` +
+            `<td class="message-cell"></td>` +
+        `</tr>`);
+
+        // Append & update
+        $('#attendanceTable tbody').append(row);
+        // No need to bind change listeners explicitly because we used delegation
+        updateAttendance();
+
+        // reset form & show confirmation
+        $('#studentID').val(''); $('#lastname').val(''); $('#firstname').val(''); $('#email').val('');
+        $('#confirm-message').text("Student successfully added!");
+        // hide confirm after 3 seconds
+        setTimeout(()=>$('#confirm-message').text(''), 3000);
+    });
+
+    /* =========================
+       Show Report (Chart)
+       ========================= */
+    $('#showReportBtn').on('click', function(){
+        const rows = $('#attendanceTable tbody tr');
+        const totalStudents = rows.length;
+        let totalPresent = 0, totalParticipated = 0;
+
+        rows.each(function(){
+            const inputs = $(this).find('td').find('input[type="checkbox"]');
+            inputs.each(function(i){
+                if(i % 2 === 0){
+                    // presence column - checked => present
+                    if($(this).is(':checked')) totalPresent++;
+                } else {
+                    if($(this).is(':checked')) totalParticipated++;
+                }
+            });
+        });
+
+        $('#report-section').show();
+
+        const ctx = document.getElementById('reportChart').getContext('2d');
+        if(window.reportChartInstance) window.reportChartInstance.destroy();
+
+        window.reportChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Students','Total Present (checks)','Total Participated (checks)'],
+                datasets: [{
+                    label: 'Attendance Report',
+                    data: [totalStudents, totalPresent, totalParticipated],
+                    backgroundColor: ['#1e3a8a','#3b82f6','#10b981']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, precision: 0 } }
+            }
+        });
+        // Announce numbers for accessibility
+        $('#sort-status').text(`Report shown — Students:${totalStudents}, Present checks:${totalPresent}, Participation checks:${totalParticipated}`);
+    });
+
+    /* =========================
+       Row Hover & Click (jQuery)
+       ========================= */
+    $('#attendanceTable tbody').on('mouseenter', 'tr', function(){
+        $(this).addClass('row-hover');
+    });
+    $('#attendanceTable tbody').on('mouseleave', 'tr', function(){
+        $(this).removeClass('row-hover');
+    });
+    $('#attendanceTable tbody').on('click', 'tr', function(e){
+        // avoid triggering when clicking on inputs
+        if($(e.target).is('input')) return;
+        const ln = $(this).children('td').eq(1).text().trim();
+        const fn = $(this).children('td').eq(2).text().trim();
+        const abs = $(this).find('.absence-count').text().trim();
+        alert(`Student: ${fn} ${ln}\nAbsences: ${abs}`);
+    });
+
+    /* =========================
+       Highlight Excellent Students & Reset
+       ========================= */
+    $('#highlightBtn').on('click', function(){
+        $('#attendanceTable tbody tr').each(function(){
+            const abs = parseInt($(this).find('.absence-count').text(), 10) || 0;
+            if(abs < 3){
+                // animate: fade + background transition
+                const $row = $(this);
+                $row.css('transition','background-color 400ms ease');
+                // flash green color then restore color class (color classes managed by updateAttendance)
+                $row.animate({opacity:0.4}, 200).animate({opacity:1}, 200).animate({opacity:0.4}, 200).animate({opacity:1}, 200);
+            }
+        });
+    });
+
+    $('#resetBtn').on('click', function(){
+        $('#attendanceTable tbody tr').each(function(){
+            $(this).stop(true,true).css({'opacity':'','transition':''});
+            // re-apply color classes correctly
+            const abs = parseInt($(this).find('.absence-count').text(), 10) || 0;
+            $(this).removeClass('green-row yellow-row red-row');
+            if(abs >= 5) $(this).addClass('red-row');
+            else if(abs >= 3) $(this).addClass('yellow-row');
+            else $(this).addClass('green-row');
+        });
+        $('#sort-status').text('Colors reset.');
+    });
+
+    /* =========================
+       Search by Name (LN or FN)
+       ========================= */
+    $('#search-box').on('keyup', function(){
+        const q = $(this).val().toLowerCase().trim();
+        $('#attendanceTable tbody tr').each(function(){
+            const ln = $(this).find('td.ln').text().toLowerCase();
+            const fn = $(this).find('td.fn').text().toLowerCase();
+            const full = (ln + ' ' + fn).trim();
+            if(q === '' || ln.includes(q) || fn.includes(q) || full.includes(q)){
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        $('#sort-status').text(q ? `Filtered by "${q}"` : '');
+    });
+
+    /* =========================
+       Sorting (Absences asc, Participation desc)
+       ========================= */
+    $('#sort-abs').on('click', function(){
+        const rows = $('#attendanceTable tbody tr').get();
+        rows.sort(function(a,b){
+            const aVal = parseInt($(a).find('.absence-count').text(),10) || 0;
+            const bVal = parseInt($(b).find('.absence-count').text(),10) || 0;
+            return aVal - bVal;
+        });
+        $('#attendanceTable tbody').append(rows);
+        $('#sort-status').text("Currently sorted by absences (ascending)");
+    });
+
+    $('#sort-part').on('click', function(){
+        const rows = $('#attendanceTable tbody tr').get();
+        rows.sort(function(a,b){
+            const aVal = parseInt($(a).find('.participation-count').text(),10) || 0;
+            const bVal = parseInt($(b).find('.participation-count').text(),10) || 0;
+            return bVal - aVal; // descending
+        });
+        $('#attendanceTable tbody').append(rows);
+        $('#sort-status').text("Currently sorted by participation (descending)");
+    });
+
+    /* =========================
+       Keep counts accurate when page loads or checkboxes changed
+       ========================= */
+    // In case initial HTML has values inconsistent with checkboxes, recalc on load
+    updateAttendance();
+
+}); // end ready
+</script>
+
+</body>
+</html>
