@@ -504,7 +504,7 @@ else {
             });
         });
 
-        $('#report-section').show();
+        document.getElementById("report-section").style.display = "block";
 
         const ctx = document.getElementById('reportChart').getContext('2d');
         if(window.reportChartInstance) window.reportChartInstance.destroy();
